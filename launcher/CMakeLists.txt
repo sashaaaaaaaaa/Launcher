@@ -1161,8 +1161,17 @@ if(INSTALL_BUNDLE STREQUAL "full")
             DIRECTORY "${QT_PLUGINS_DIR}/platforms"
             DESTINATION ${PLUGIN_DEST_DIR}
             COMPONENT Runtime
-            REGEX "minimal|linuxfb|offscreen" EXCLUDE
+            REGEX "minimal|offscreen" EXCLUDE
         )
+        # TLS plugins: Qt 6 moved the OpenSSL backend out of QtNetwork into its own plugin.
+        # Without it, HTTPS (updater, auth, downloads) fails in a portable bundle.
+        if(EXISTS "${QT_PLUGINS_DIR}/tls")
+            install(
+                DIRECTORY "${QT_PLUGINS_DIR}/tls"
+                DESTINATION ${PLUGIN_DEST_DIR}
+                COMPONENT Runtime
+            )
+        endif()
         # Style plugins
         if(EXISTS "${QT_PLUGINS_DIR}/styles")
             install(
@@ -1197,11 +1206,22 @@ if(INSTALL_BUNDLE STREQUAL "full")
             DIRECTORY "${QT_PLUGINS_DIR}/platforms"
             DESTINATION ${PLUGIN_DEST_DIR}
             COMPONENT Runtime
-            REGEX "minimal|linuxfb|offscreen" EXCLUDE
+            REGEX "minimal|offscreen" EXCLUDE
             REGEX "d\\." EXCLUDE
             REGEX "_debug\\." EXCLUDE
             REGEX "\\.dSYM" EXCLUDE
         )
+        # TLS plugins: Qt 6 moved the OpenSSL backend out of QtNetwork into its own plugin.
+        if(EXISTS "${QT_PLUGINS_DIR}/tls")
+            install(
+                DIRECTORY "${QT_PLUGINS_DIR}/tls"
+                DESTINATION ${PLUGIN_DEST_DIR}
+                COMPONENT Runtime
+                REGEX "d\\." EXCLUDE
+                REGEX "_debug\\." EXCLUDE
+                REGEX "\\.dSYM" EXCLUDE
+            )
+        endif()
         # Style plugins
         if(EXISTS "${QT_PLUGINS_DIR}/styles")
             install(

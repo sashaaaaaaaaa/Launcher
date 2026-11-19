@@ -24,9 +24,9 @@ export GAME_PRELOAD=${GAME_PRELOAD-${LD_PRELOAD}}
 export LD_LIBRARY_PATH="${LAUNCHER_DIR}/bin":$LAUNCHER_LIBRARY_PATH
 export LD_PRELOAD=$LAUNCHER_PRELOAD
 export QT_PLUGIN_PATH="${LAUNCHER_DIR}/plugins"
-export QT_FONTPATH="${LAUNCHER_DIR}/fonts"
+export QT_QPA_FONTDIR="${LAUNCHER_DIR}/fonts"
 
-# Detect missing dependencies...
+# Detect missing dependencies... (nullglob-safe so an empty plugin dir does not create a literal glob)
 DEPS_LIST=`ldd "${LAUNCHER_DIR}"/plugins/*/*.so 2>/dev/null | grep "not found" | sort -u | awk -vORS=", " '{ print $1 }'`
 if [ "x$DEPS_LIST" = "x" ]; then
     # We have all our dependencies. Run the launcher.

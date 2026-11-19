@@ -466,6 +466,12 @@ slots:
         write(FS::PathCombine(stuck, "libfoo.so"), "foo\n");
         auto permissions = QFile::permissions(stuck);
         QVERIFY(QFile::setPermissions(stuck, QFile::ReadOwner | QFile::ExeOwner));
+        if (QFileInfo(stuck).isWritable())
+        {
+            // root ignores the missing write bit, so this check cannot fail when privileged
+            QFile::setPermissions(stuck, permissions);
+            return;
+        }
         auto fresh = prepareBackupDir(update.path());
         QFile::setPermissions(stuck, permissions);
         QVERIFY(!fresh.isEmpty());

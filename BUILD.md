@@ -34,25 +34,31 @@ git submodule update
 
 # Building like the releases
 
-The releases are built in containers with old toolchains (Qt 5.6 for Linux and Windows,
-Windows XP and old glibc compatibility), by [hopper](https://github.com/MultiMC/hopper).
-The toolchain images are public, so on Linux with Docker you can build exactly what the
-releases build, for Linux and Windows. That also tells you early if a change uses something
-newer than Qt 5.6. See hopper's README, [Building one platform](https://github.com/MultiMC/hopper#building-one-platform).
+The upstream releases were built in containers with old toolchains (Qt 5.6 for Linux and
+Windows, Windows XP and old glibc compatibility) by [hopper](https://github.com/MultiMC/hopper).
+Those instructions describe the historic Qt 5 release builds and are **not** the toolchain
+used by this Qt 6 port. See hopper's README,
+[Building one platform](https://github.com/MultiMC/hopper#building-one-platform), if you
+need to reproduce an upstream release build.
 
 The rest of this guide is about building with your own tools.
 
-# Linux
+# Linux (Qt 6 port)
 
-Getting the project to build and run on Linux is easy if you use any modern and up-to-date linux distribution.
+This branch is **Qt 6 only** and targets Linux first. Windows and macOS are not yet ported;
+the instructions below supersede the Qt 5-era ones further down this file.
 
 ## Build dependencies
-* A C++ compiler capable of building C++11 code.
-* Qt 5.6+ Development tools (http://qt-project.org/downloads) ("Qt Online Installer for Linux (64 bit)") or the equivalent from your package manager. It is always better to use the Qt from your distribution, as long as it has a new enough version. (for example, `qttools5-dev`)
-* cmake 3.1 or newer
-* zlib (for example, `zlib1g-dev`)
-* Java JDK 8 (for example, `openjdk-8-jdk`)
-* GL headers (for example, `libgl1-mesa-dev`)
+* A C++ compiler capable of building C++17 code (GCC/Clang).
+* Qt 6 development tools: Core, Widgets, Concurrent, Network, Test, Xml, OpenGL and
+  **Core5Compat** (the latter is still required for binary JSON compatibility and the
+  vendored QuaZip fork). Debian/Ubuntu: `qt6-base-dev qt6-tools-dev qt6-svg-dev
+  libqt6core5compat6-dev`; Fedora: `qt6-qtbase-devel qt6-qttools-devel qt6-qtsvg-devel
+  qt6-qt5compat-devel`; Slackware: `qt6` plus `qt6-core5compat`.
+* cmake **3.16 or newer** (4.x works).
+* zlib (for example, `zlib1g-dev`).
+* A JDK (8 or newer; the Java helpers compile with `--release 8`).
+* GL headers (for example, `libgl1-mesa-dev`).
 
 ### Building from command line
 You need a source folder, a build folder and an install folder.
@@ -62,18 +68,21 @@ Let's say you want everything in `~/MultiMC/`:
 ```
 # make all the folders
 mkdir ~/MultiMC && cd ~/MultiMC
-mkdir build
-mkdir install
-# clone the complete source
-git clone --recursive https://github.com/MultiMC/Launcher.git src
+# clone the complete source (this branch)
+git clone --recursive -b qt6-linux https://github.com/MultiMC/Launcher.git src
 # configure the project
-cd build
-cmake -DCMAKE_INSTALL_PREFIX=../install ../src
+cmake -S src -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=~/MultiMC/install
 # build & install (use -j with the number of cores your CPU has)
-make -j8 install
+cmake --build build -j8
+cmake --install build
 ```
 
-**NOTE:** If you want to treat all warnings as errors add -DCMAKE_BUILD_TYPE=Debug to the above cmake command
+If Qt 6 is not in the default CMake search path, add
+`-DCMAKE_PREFIX_PATH=/path/to/Qt6/<arch>` and/or `-DQt6_DIR=/path/to/Qt6/<arch>/lib/cmake/Qt6`.
+
+To treat all warnings as errors, use `-DCMAKE_BUILD_TYPE=Debug`.
+
+Run the tests with `ctest --test-dir build --output-on-failure`.
 
 You can use IDEs like KDevelop or QtCreator to open the CMake project if you want to work on the code.
 
@@ -81,8 +90,7 @@ You can use IDEs like KDevelop or QtCreator to open the CMake project if you wan
 1. Run the Qt installer.
 2. Choose a place to install Qt.
 3. Choose the components you want to install.
-    - You need Qt 5.6.x 64-bit ticked.
-    - You need Tools/Qt Creator ticked.
+    - You need a Qt 6.x 64-bit kit ticked (including Core5Compat and Qt Creator).
     - Other components are selected by default, you can untick them if you don't need them.
 4. Accept the license agreements.
 5. Double check the install details and then click "Install".
@@ -103,7 +111,10 @@ You can use IDEs like KDevelop or QtCreator to open the CMake project if you wan
 
 **If this doesn't work for you, let us know on IRC ([Esper/#MultiMC](http://webchat.esper.net/?nick=&channels=MultiMC))!**
 
-# Windows
+# Windows (Qt 5-era, not yet ported)
+
+The instructions in this section describe the upstream Qt 5 build and have not been
+updated for this Qt 6 branch. Use the Linux section above for the current build flow.
 
 Getting the project to build and run on Windows is easy if you use Qt's IDE, Qt Creator. The project will simply not compile using Microsoft build tools, because that's not something we do. If it does compile, it is by chance only.
 
@@ -189,7 +200,10 @@ zlib1.dll
 5. Run the command `mingw32-make install`, and it should install MultiMC, to whatever the `-DCMAKE_INSTALL_PREFIX` was.
 6. In most cases, whenever compiling, the OpenSSL dll's aren't put into the directory to where MultiMC installs, meaning you cannot log in. The best way to fix this is just to do `copy C:\OpenSSL-Win32\*.dll C:\Where\you\installed\MultiMC\to`. This should copy the required OpenSSL dll's to log in.
 
-# macOS
+# macOS (Qt 5-era, not yet ported)
+
+The instructions in this section describe the upstream Qt 5 build and have not been
+updated for this Qt 6 branch. Use the Linux section above for the current build flow.
 
 ### Install prerequisites:
 - Install XCode Command Line tools

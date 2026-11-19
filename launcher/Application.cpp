@@ -293,7 +293,13 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
     }
     else
     {
-#if defined(Q_OS_MAC)
+#ifdef LAUNCHER_LINUX_DATADIR
+        QString xdgDataHome = QFile::decodeName(qgetenv("XDG_DATA_HOME"));
+        if (xdgDataHome.isEmpty())
+            xdgDataHome = QDir::homePath() + QLatin1String("/.local/share");
+        dataPath = xdgDataHome + "/multimc";
+        adjustedBy += "XDG standard " + dataPath;
+#elif defined(Q_OS_MAC)
         QDir foo(FS::PathCombine(applicationDirPath(), "../../Data"));
         dataPath = foo.absolutePath();
         adjustedBy += "Fallback to special Mac location " + dataPath;
@@ -556,6 +562,10 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
     // Set up paths
     {
+#ifdef MULTIMC_JARS_LOCATION
+        m_jarsPath = TOSTRING(MULTIMC_JARS_LOCATION);
+#endif
+
         // Root path is used for updates.
 #if defined(Q_OS_LINUX) || defined(Q_OS_FREEBSD)
         QDir foo(FS::PathCombine(binPath, ".."));
