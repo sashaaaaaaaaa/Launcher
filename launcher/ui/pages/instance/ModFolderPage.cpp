@@ -144,7 +144,7 @@ ModFolderPage::ModFolderPage(
     ui->actionsToolbar->insertSpacer(ui->actionView_configs);
 
     m_inst = inst;
-    on_RunningState_changed(m_inst && m_inst->isRunning());
+    runningStateChanged(m_inst && m_inst->isRunning());
     m_mods = mods;
     m_id = id;
     m_displayName = displayName;
@@ -167,7 +167,7 @@ ModFolderPage::ModFolderPage(
     auto smodel = ui->modTreeView->selectionModel();
     connect(smodel, &QItemSelectionModel::currentChanged, this, &ModFolderPage::modCurrent);
     connect(ui->filterEdit, &QLineEdit::textChanged, this, &ModFolderPage::on_filterTextChanged);
-    connect(m_inst, &BaseInstance::runningStatusChanged, this, &ModFolderPage::on_RunningState_changed);
+    connect(m_inst, &BaseInstance::runningStatusChanged, this, &ModFolderPage::runningStateChanged);
 }
 
 void ModFolderPage::modItemActivated(const QModelIndex&)
@@ -223,7 +223,7 @@ ModFolderPage::~ModFolderPage()
     delete ui;
 }
 
-void ModFolderPage::on_RunningState_changed(bool running)
+void ModFolderPage::runningStateChanged(bool running)
 {
     if(m_controlsEnabled == !running) {
         return;

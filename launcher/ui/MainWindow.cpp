@@ -248,7 +248,6 @@ public:
     TranslatedAction actionMods;
     TranslatedAction actionViewSelectedInstFolder;
     TranslatedAction actionViewSelectedMCFolder;
-    TranslatedAction actionViewSelectedModsFolder;
     TranslatedAction actionDeleteInstance;
     TranslatedAction actionConfig_Folder;
     TranslatedAction actionCAT;
@@ -608,15 +607,6 @@ public:
         actionViewSelectedMCFolder.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the selected instance's minecraft folder in a file browser."));
         all_actions.append(&actionViewSelectedMCFolder);
         instanceToolBar->addAction(actionViewSelectedMCFolder);
-
-        /*
-        actionViewSelectedModsFolder = TranslatedAction(MainWindow);
-        actionViewSelectedModsFolder->setObjectName(QStringLiteral("actionViewSelectedModsFolder"));
-        actionViewSelectedModsFolder.setTextId(QT_TRANSLATE_NOOP("MainWindow", "Mods Folder"));
-        actionViewSelectedModsFolder.setTooltipId(QT_TRANSLATE_NOOP("MainWindow", "Open the selected instance's mods folder in a file browser."));
-        all_actions.append(&actionViewSelectedModsFolder);
-        instanceToolBar->addAction(actionViewSelectedModsFolder);
-        */
 
         actionConfig_Folder = TranslatedAction(MainWindow);
         actionConfig_Folder->setObjectName(QStringLiteral("actionConfig_Folder"));
@@ -1990,11 +1980,6 @@ void MainWindow::globalSettingsClosed()
     update();
 }
 
-void MainWindow::on_actionInstanceSettings_triggered()
-{
-    APPLICATION->showInstanceWindow(m_selectedInstance, "settings");
-}
-
 void MainWindow::on_actionEditInstNotes_triggered()
 {
     APPLICATION->showInstanceWindow(m_selectedInstance, "notes");
@@ -2111,20 +2096,6 @@ void MainWindow::on_actionViewSelectedMCFolder_triggered()
     if (m_selectedInstance)
     {
         QString str = m_selectedInstance->gameRoot();
-        if (!FS::ensureFilePathExists(str))
-        {
-            // TODO: report error
-            return;
-        }
-        DesktopServices::openDirectory(QDir(str).absolutePath());
-    }
-}
-
-void MainWindow::on_actionViewSelectedModsFolder_triggered()
-{
-    if (m_selectedInstance)
-    {
-        QString str = m_selectedInstance->modsRoot();
         if (!FS::ensureFilePathExists(str))
         {
             // TODO: report error

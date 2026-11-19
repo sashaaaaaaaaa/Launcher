@@ -99,8 +99,6 @@ private slots:
 
     void on_actionViewSelectedMCFolder_triggered();
 
-    void on_actionViewSelectedModsFolder_triggered();
-
     void refreshInstances();
 
     void on_actionViewCentralModsFolder_triggered();
@@ -108,8 +106,6 @@ private slots:
     void checkForUpdates();
 
     void on_actionSettings_triggered();
-
-    void on_actionInstanceSettings_triggered();
 
     void on_actionManageAccounts_triggered();
 
