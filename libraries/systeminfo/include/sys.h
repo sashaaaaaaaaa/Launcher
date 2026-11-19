@@ -1,6 +1,5 @@
 #pragma once
 #include <QString>
-#include <QRegExp>
 
 namespace Sys
 {
@@ -113,7 +112,6 @@ public:
     }
     static Architecture deserialize(const QString& arch_str)
     {
-        QRegExp unknown("^Unknown\\((.+)\\)$");
         if(arch_str == "null")
         {
             return Architecture();

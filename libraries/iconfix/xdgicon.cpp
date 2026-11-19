@@ -27,37 +27,91 @@
 
 #include "xdgicon.h"
 
-#include <QString>
-#include <QDebug>
 #include <QDir>
-#include <QStringList>
+#include <QFile>
 #include <QFileInfo>
-#include <QCache>
-#include "internal/qiconloader_p.h"
-#include <QCoreApplication>
-
-/************************************************
-
- ************************************************/
-static void qt_cleanup_icon_cache();
-typedef QCache<QString, QIcon> IconCache;
+#include <QIcon>
+#include <QStringList>
+#include <QTextStream>
 
 namespace
 {
-struct QtIconCache : public IconCache
-{
-    QtIconCache()
-    {
-        qAddPostRoutine(qt_cleanup_icon_cache);
-    }
-};
-}
-Q_GLOBAL_STATIC(IconCache, qtIconCache)
 
-static void qt_cleanup_icon_cache()
+QString fallbackThemeName;
+
+void ensureResourceThemeSearchPath()
 {
-    qtIconCache()->clear();
+    QStringList paths = QIcon::themeSearchPaths();
+    const QString resourcePath(QLatin1String(":/icons"));
+    if (!paths.contains(resourcePath))
+    {
+        paths.prepend(resourcePath);
+        QIcon::setThemeSearchPaths(paths);
+    }
 }
+
+QString themeIconName(const QString &iconName)
+{
+    QString name = QFileInfo(iconName).fileName();
+    static const QStringList extensions { QLatin1String(".png"), QLatin1String(".svg"), QLatin1String(".xpm") };
+    for (const QString &extension : extensions)
+    {
+        if (name.endsWith(extension, Qt::CaseInsensitive))
+        {
+            name.truncate(name.length() - extension.length());
+            break;
+        }
+    }
+    return name;
+}
+
+QIcon iconFromFallbackTheme(const QString &name)
+{
+    if (fallbackThemeName.isEmpty())
+        return QIcon();
+
+    ensureResourceThemeSearchPath();
+
+    const QString themeRoot = QLatin1String(":/icons/") + fallbackThemeName;
+    QFile indexFile(themeRoot + QLatin1String("/index.theme"));
+    if (!indexFile.open(QIODevice::ReadOnly))
+        return QIcon();
+
+    QStringList directories;
+    bool inIconThemeSection = false;
+    QTextStream stream(&indexFile);
+    while (!stream.atEnd())
+    {
+        const QString line = stream.readLine().trimmed();
+        if (line.startsWith(QLatin1Char('[')))
+        {
+            inIconThemeSection = line.compare(QLatin1String("[Icon Theme]"), Qt::CaseInsensitive) == 0;
+            continue;
+        }
+        if (!inIconThemeSection)
+            continue;
+        if (line.startsWith(QLatin1String("Directories="), Qt::CaseInsensitive))
+        {
+            directories = line.mid(QLatin1String("Directories=").length()).split(QLatin1Char(','), Qt::SkipEmptyParts);
+            break;
+        }
+    }
+
+    static const QStringList extensions { QLatin1String(".svg"), QLatin1String(".png"), QLatin1String(".xpm") };
+    for (const QString &directory : directories)
+    {
+        for (const QString &extension : extensions)
+        {
+            const QString path = themeRoot + QLatin1Char('/') + directory + QLatin1Char('/') + name + extension;
+            if (QFileInfo::exists(path))
+                return QIcon(path);
+        }
+    }
+
+    return QIcon();
+}
+
+} // namespace
 
 /************************************************
 
@@ -86,67 +140,52 @@ QString XdgIcon::themeName()
  ************************************************/
 void XdgIcon::setThemeName(const QString &themeName)
 {
+    ensureResourceThemeSearchPath();
     QIcon::setThemeName(themeName);
-    QtXdg::QIconLoader::instance()->updateSystemTheme();
 }
 
 void XdgIcon::setFallbackThemeName(const QString &themeName)
 {
-    QtXdg::QIconLoader::instance()->setFallbackThemeName(themeName);
+    fallbackThemeName = themeName;
+    ensureResourceThemeSearchPath();
 }
 
 /************************************************
  Returns the QIcon corresponding to name in the current icon theme. If no such icon
- is found in the current theme fallback is return instead.
+ is found in the current theme fallback is returned.
  ************************************************/
 QIcon XdgIcon::fromTheme(const QString &iconName, const QIcon &fallback)
 {
     if (iconName.isEmpty())
         return fallback;
 
-    bool isAbsolute = (iconName[0] == '/');
+    ensureResourceThemeSearchPath();
 
-    QString name = QFileInfo(iconName).fileName();
-    if (name.endsWith(".png", Qt::CaseInsensitive) ||
-        name.endsWith(".svg", Qt::CaseInsensitive) ||
-        name.endsWith(".xpm", Qt::CaseInsensitive))
-    {
-        name.truncate(name.length() - 4);
-    }
+    if (QFileInfo(iconName).isAbsolute())
+        return QIcon(iconName);
 
-    QIcon icon;
-
-    if (qtIconCache()->contains(name))
-    {
-        icon = *qtIconCache()->object(name);
-    }
-    else
-    {
-        QIcon *cachedIcon;
-        if (!isAbsolute)
-            cachedIcon = new QIcon(new QtXdg::QIconLoaderEngineFixed(name));
-        else
-            cachedIcon = new QIcon(iconName);
-        qtIconCache()->insert(name, cachedIcon);
-        icon = *cachedIcon;
-    }
-
-    // Note the qapp check is to allow lazy loading of static icons
-    // Supporting fallbacks will not work for this case.
-    if (qApp && !isAbsolute && icon.availableSizes().isEmpty())
-    {
+    const QString name = themeIconName(iconName);
+    if (name.isEmpty())
         return fallback;
-    }
-    return icon;
+
+    QIcon icon = QIcon::fromTheme(name);
+    if (!icon.isNull())
+        return icon;
+
+    icon = iconFromFallbackTheme(name);
+    if (!icon.isNull())
+        return icon;
+
+    return fallback;
 }
 
 /************************************************
  Returns the QIcon corresponding to names in the current icon theme. If no such icon
- is found in the current theme fallback is return instead.
+ is found in the current theme fallback is returned.
  ************************************************/
 QIcon XdgIcon::fromTheme(const QStringList &iconNames, const QIcon &fallback)
 {
-    foreach (QString iconName, iconNames)
+    for (const QString &iconName : iconNames)
     {
         QIcon icon = fromTheme(iconName);
         if (!icon.isNull())

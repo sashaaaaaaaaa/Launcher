@@ -468,7 +468,7 @@ add_executable(PackageManifest
 )
 target_link_libraries(PackageManifest
     Launcher_logic
-    Qt5::Test
+    Qt6::Test
 )
 target_include_directories(PackageManifest
     PRIVATE ../cmake/UnitTest/
@@ -996,7 +996,7 @@ elseif(APPLE)
     list(APPEND LAUNCHER_SOURCES MacOS.h ui/themes/TitleBar_mac.mm ui/themes/SystemAppearance_mac.mm)
 else()
     # the desktop portal, over D-Bus
-    find_package(Qt5DBus REQUIRED)
+    find_package(Qt6 REQUIRED COMPONENTS DBus)
     list(APPEND LAUNCHER_SOURCES ui/themes/TitleBar_other.cpp ui/themes/SystemAppearance_linux.cpp)
 endif()
 
@@ -1007,7 +1007,7 @@ else()
     list(APPEND LAUNCHER_SOURCES DesktopIntegration.h DesktopIntegration_other.cpp)
 endif()
 
-qt5_wrap_ui(LAUNCHER_UI
+qt_wrap_ui(LAUNCHER_UI
     ui/dialogs/AboutDialog.ui
     ui/dialogs/AccountsDialog.ui
     ui/dialogs/CopyInstanceDialog.ui
@@ -1054,7 +1054,7 @@ qt5_wrap_ui(LAUNCHER_UI
     ui/widgets/MCModInfoFrame.ui
 )
 
-qt5_add_resources(LAUNCHER_RESOURCES
+qt_add_resources(LAUNCHER_RESOURCES
     resources/backgrounds/backgrounds.qrc
     resources/multimc/multimc.qrc
     resources/pe_dark/pe_dark.qrc
@@ -1090,11 +1090,13 @@ target_link_libraries(Launcher_logic
     qrcode
 )
 target_link_libraries(Launcher_logic
-    Qt5::Core
-    Qt5::Xml
-    Qt5::Network
-    Qt5::Concurrent
-    Qt5::Gui
+    Qt6::Core
+    Qt6::Core5Compat
+    Qt6::Xml
+    Qt6::Network
+    Qt6::Concurrent
+    Qt6::Gui
+    Qt6::OpenGL
 )
 target_link_libraries(Launcher_logic
     Launcher_iconfix
@@ -1105,7 +1107,7 @@ target_link_libraries(Launcher_logic
 if(APPLE)
     target_link_libraries(Launcher_logic "-framework AppKit")
 elseif(NOT WIN32)
-    target_link_libraries(Launcher_logic Qt5::DBus)
+    target_link_libraries(Launcher_logic Qt6::DBus)
 endif()
 
 add_executable(${Launcher_Name} MACOSX_BUNDLE WIN32 main.cpp ${LAUNCHER_RCS})

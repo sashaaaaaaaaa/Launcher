@@ -1,9 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
-
-if(WIN32)
-    # In Qt 5.1+ we have our own main() function, don't autolink to qtmain on Windows
-    cmake_policy(SET CMP0020 OLD)
-endif()
+cmake_minimum_required(VERSION 3.16)
 
 project(Launcher)
 enable_testing()
@@ -52,10 +47,10 @@ set(CMAKE_JAVA_TARGET_OUTPUT_DIR ${PROJECT_BINARY_DIR}/jars)
 ######## Set compiler flags ########
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 set(CMAKE_C_STANDARD_REQUIRED true)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 11)
 include(GenerateExportHeader)
-set(CMAKE_CXX_FLAGS " -Wall -pedantic -Wno-deprecated-declarations -D_GLIBCXX_USE_CXX11_ABI=0 -fstack-protector-strong --param=ssp-buffer-size=4 ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS " -Wall -pedantic -Wno-deprecated-declarations -fstack-protector-strong --param=ssp-buffer-size=4 ${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS_RELEASE " -O3 -D_FORTIFY_SOURCE=2 ${CMAKE_CXX_FLAGS_RELEASE}")
 if(UNIX AND APPLE)
     set(CMAKE_CXX_FLAGS " -stdlib=libc++ ${CMAKE_CXX_FLAGS}")
@@ -67,9 +62,6 @@ if(MINGW)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mstack-protector-guard=global")
 endif()
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Werror -Werror=return-type -O0")
-
-# Fix build with Qt 5.13
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DQT_NO_DEPRECATED_WARNINGS=Y")
 
 ##################################### Set Application options #####################################
 
@@ -167,22 +159,36 @@ add_custom_target(tcversion echo "\\#\\#teamcity[setParameter name=\\'env.LAUNCH
 ################################ 3rd Party Libs ################################
 
 # Find the required Qt parts
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5Concurrent REQUIRED)
-find_package(Qt5Network REQUIRED)
-find_package(Qt5Test REQUIRED)
-find_package(Qt5Xml REQUIRED)
+find_package(Qt6 REQUIRED COMPONENTS Core Core5Compat Widgets Concurrent Network Test Xml OpenGL)
+find_package(Qt6 REQUIRED COMPONENTS DBus OPTIONAL_COMPONENTS)
 
-# The Qt5 cmake files don't provide its install paths, so ask qmake.
-include(QMakeQuery)
-query_qmake(QUERY QT_INSTALL_PLUGINS RESULT QT_PLUGINS_DIR)
-query_qmake(QUERY QT_INSTALL_LIBS RESULT QT_LIBS_DIR)
-query_qmake(QUERY QT_INSTALL_LIBEXECS RESULT QT_LIBEXECS_DIR)
-
-if (Qt5_POSITION_INDEPENDENT_CODE)
-    SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
+# Qt6 provides install paths via Qt6 package variables; keep names used by install logic.
+if(DEFINED QT6_INSTALL_PLUGINS)
+    set(QT_PLUGINS_DIR "${QT6_INSTALL_PLUGINS}")
+elseif(DEFINED Qt6_INSTALL_PLUGINS)
+    set(QT_PLUGINS_DIR "${Qt6_INSTALL_PLUGINS}")
 endif()
+if(DEFINED QT6_INSTALL_LIBS)
+    set(QT_LIBS_DIR "${QT6_INSTALL_LIBS}")
+elseif(DEFINED Qt6_INSTALL_LIBS)
+    set(QT_LIBS_DIR "${Qt6_INSTALL_LIBS}")
+endif()
+if(DEFINED QT6_INSTALL_LIBEXECS)
+    set(QT_LIBEXECS_DIR "${QT6_INSTALL_LIBEXECS}")
+elseif(DEFINED Qt6_INSTALL_LIBEXECS)
+    set(QT_LIBEXECS_DIR "${Qt6_INSTALL_LIBEXECS}")
+endif()
+# Fallback: try querying qmake6 if present (optional)
+if(NOT QT_PLUGINS_DIR OR NOT QT_LIBS_DIR)
+    find_program(QMAKE6_EXECUTABLE NAMES qmake6 qmake)
+    if(QMAKE6_EXECUTABLE)
+        execute_process(COMMAND "${QMAKE6_EXECUTABLE}" -query QT_INSTALL_PLUGINS OUTPUT_VARIABLE QT_PLUGINS_DIR OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
+        execute_process(COMMAND "${QMAKE6_EXECUTABLE}" -query QT_INSTALL_LIBS OUTPUT_VARIABLE QT_LIBS_DIR OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
+        execute_process(COMMAND "${QMAKE6_EXECUTABLE}" -query QT_INSTALL_LIBEXECS OUTPUT_VARIABLE QT_LIBEXECS_DIR OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
+    endif()
+endif()
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 ####################################### Branding #######################################
 

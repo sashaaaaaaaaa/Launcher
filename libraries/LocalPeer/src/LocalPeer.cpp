@@ -41,11 +41,13 @@
 
 #include "LocalPeer.h"
 #include <QCoreApplication>
+#include <QByteArrayView>
 #include <QDataStream>
 #include <QTime>
 #include <QLocalServer>
 #include <QLocalSocket>
 #include <QDir>
+#include <QRegularExpression>
 #include "LockedFile.h"
 
 #if defined(Q_OS_WIN)
@@ -72,10 +74,10 @@ ApplicationId ApplicationId::fromTraditionalApp()
     protoId = protoId.toLower();
 #endif
     auto prefix = protoId.section(QLatin1Char('/'), -1);
-    prefix.remove(QRegExp("[^a-zA-Z]"));
+    prefix.remove(QRegularExpression(QLatin1String("[^a-zA-Z]")));
     prefix.truncate(6);
     QByteArray idc = protoId.toUtf8();
-    quint16 idNum = qChecksum(idc.constData(), idc.size());
+    quint16 idNum = qChecksum(QByteArrayView(idc));
     auto socketName = QLatin1String("qtsingleapp-") + prefix + QLatin1Char('-') + QString::number(idNum, 16);
 #if defined(Q_OS_WIN)
     if (!pProcessIdToSessionId)
@@ -97,7 +99,7 @@ ApplicationId ApplicationId::fromTraditionalApp()
 
 ApplicationId ApplicationId::fromPathAndVersion(const QString& dataPath, const QString& version)
 {
-    QCryptographicHash shasum(QCryptographicHash::Algorithm::Sha1);
+    QCryptographicHash shasum(QCryptographicHash::Sha1);
     QString result = dataPath + QLatin1Char('-') + version;
     shasum.addData(result.toUtf8());
     return ApplicationId(QLatin1String("qtsingleapp-") + QString::fromLatin1(shasum.result().toHex()));
