@@ -276,7 +276,9 @@ bool reconstructAssets(QString assetsId, QString resourcesFolder)
         // TODO: Write last used time to virtualRoot/.lastused
         if(removeLeftovers)
         {
-            for(auto & file: presentFiles)
+            auto files = QStringList(presentFiles.begin(), presentFiles.end());
+            files.sort(); // QSet iteration order is randomized in Qt 6
+            for(const auto & file: files)
             {
                 qDebug() << "Would remove" << file;
             }

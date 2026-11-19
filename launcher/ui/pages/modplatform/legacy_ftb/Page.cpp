@@ -117,7 +117,9 @@ void Page::openedImpl()
         ftbFetchTask->fetch();
         ftbPrivatePacks->load();
         const auto privatePackCodes = ftbPrivatePacks->getCurrentPackCodes();
-        ftbFetchTask->fetchPrivate(QStringList(privatePackCodes.begin(), privatePackCodes.end()));
+        auto packCodeList = QStringList(privatePackCodes.begin(), privatePackCodes.end());
+        packCodeList.sort(); // QSet iteration order is randomized in Qt 6
+        ftbFetchTask->fetchPrivate(packCodeList);
         initialized = true;
     }
     suggestCurrent();

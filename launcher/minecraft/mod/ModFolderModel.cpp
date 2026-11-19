@@ -142,8 +142,11 @@ void ModFolderModel::finishUpdate()
     {
         QSet<QString> added = newSet;
         added.subtract(currentSet);
-        beginInsertRows(QModelIndex(), mods.size(), mods.size() + added.size() - 1);
-        for(auto & addedMod: added) {
+        // QSet iteration order is randomized in Qt 6; keep new mods in a stable order.
+        QStringList addedList(added.begin(), added.end());
+        addedList.sort();
+        beginInsertRows(QModelIndex(), mods.size(), mods.size() + addedList.size() - 1);
+        for(const auto & addedMod: addedList) {
             mods.append(newMods[addedMod]);
             resolveMod(mods.last());
         }

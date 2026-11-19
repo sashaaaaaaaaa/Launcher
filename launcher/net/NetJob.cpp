@@ -16,6 +16,7 @@
 #include "NetJob.h"
 #include "Download.h"
 
+#include <algorithm>
 #include <QDebug>
 
 void NetJob::partSucceeded(int index)
@@ -186,6 +187,7 @@ bool NetJob::abort()
     m_todo.clear();
     // abort active
     QList<int> toKill(m_doing.begin(), m_doing.end());
+    std::sort(toKill.begin(), toKill.end());
     for(auto index: toKill)
     {
         auto part = downloads[index];

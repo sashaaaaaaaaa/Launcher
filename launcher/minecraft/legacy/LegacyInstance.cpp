@@ -228,7 +228,9 @@ QStringList LegacyInstance::verboseDescription(AuthSessionPtr session, QuickPlay
     if(alltraits.size())
     {
         out << "Traits:";
-        for (auto trait : alltraits)
+        auto traitList = QStringList(alltraits.begin(), alltraits.end());
+        traitList.sort();
+        for (const auto &trait : traitList)
         {
             out << "  " + trait;
         }

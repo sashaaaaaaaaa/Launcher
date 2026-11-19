@@ -343,7 +343,11 @@ QStringList MinecraftInstance::javaArguments() const
     {
         bool has_shadow_pages = false;
         int shadow_pages_size = 32;
-        for(const auto &item: traits_)
+        // QSet iteration order is randomized in Qt 6; sort so that, if several
+        // StackShadowPages traits exist, the same one wins on every run.
+        auto sortedTraits = QStringList(traits_.begin(), traits_.end());
+        sortedTraits.sort();
+        for(const auto &item: sortedTraits)
         {
             auto parts = item.split(QChar('='));
             if(parts.size() != 2)
@@ -607,7 +611,11 @@ QString MinecraftInstance::createLaunchScript(AuthSessionPtr session, QuickPlayT
         launchScript += "natives " + getNativePath() + "\n";
     }
 
-    for (auto trait : profile->getTraits())
+    // QSet iteration order is randomized in Qt 6; emit traits in a stable order.
+    const auto &traits = profile->getTraits();
+    auto traitList = QStringList(traits.begin(), traits.end());
+    traitList.sort();
+    for (const auto &trait : traitList)
     {
         launchScript += "traits " + trait + "\n";
     }
@@ -628,7 +636,9 @@ QStringList MinecraftInstance::verboseDescription(AuthSessionPtr session, QuickP
     if(alltraits.size())
     {
         out << "Traits:";
-        for (auto trait : alltraits)
+        auto traitList = QStringList(alltraits.begin(), alltraits.end());
+        traitList.sort();
+        for (const auto &trait : traitList)
         {
             out << "traits " + trait;
         }

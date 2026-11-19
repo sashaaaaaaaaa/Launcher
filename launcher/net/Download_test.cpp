@@ -78,6 +78,19 @@ private:
             socket->write("HTTP/1.1 200 OK\r\nContent-Length: 5\r\nConnection: close\r\n\r\nhello");
             socket->disconnectFromHost();
         }
+        else if(path == "/redirect")
+        {
+            // absolute-path redirect: exercises the Location parsing workarounds
+            socket->write("HTTP/1.1 302 Found\r\nLocation: /hello\r\nContent-Length: 0\r\nConnection: close\r\n\r\n");
+            socket->disconnectFromHost();
+        }
+        else if(path == "/redirect-protocol-relative")
+        {
+            // protocol-relative redirect (//host/path), the QTBUG-41061 case
+            const auto location = "//127.0.0.1:" + QByteArray::number(m_server.serverPort()) + "/hello";
+            socket->write("HTTP/1.1 302 Found\r\nLocation: " + location + "\r\nContent-Length: 0\r\nConnection: close\r\n\r\n");
+            socket->disconnectFromHost();
+        }
         else if(path == "/stall")
         {
             // 10 of the 100 bytes it promises, then nothing
@@ -163,6 +176,25 @@ slots:
         QCOMPARE(download->httpStatus(), 200);
         QCOMPARE(download->networkError(), QNetworkReply::NoError);
         QVERIFY(!download->wasNotFound());
+    }
+
+    void test_redirect()
+    {
+        QByteArray data;
+        auto download = Net::Download::makeByteArray(m_server->url("/redirect"), &data, Net::Download::Option::NoMirrors);
+        QVERIFY(run(download));
+        QCOMPARE(data, QByteArray("hello"));
+        QCOMPARE(download->httpStatus(), 200);
+        QCOMPARE(download->networkError(), QNetworkReply::NoError);
+    }
+
+    void test_redirectProtocolRelative()
+    {
+        QByteArray data;
+        auto download = Net::Download::makeByteArray(m_server->url("/redirect-protocol-relative"), &data, Net::Download::Option::NoMirrors);
+        QVERIFY(run(download));
+        QCOMPARE(data, QByteArray("hello"));
+        QCOMPARE(download->httpStatus(), 200);
     }
 
     void test_notFound()

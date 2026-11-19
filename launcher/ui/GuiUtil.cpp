@@ -125,7 +125,9 @@ static QStringList BrowseForFileInternal(QString context, QString caption, QStri
     static QMap<QString, QString> savedPaths;
 
     QFileDialog w(parentWidget, caption);
-    QSet<QString> locations;
+    // Keep the intended Desktop/Documents/Downloads/Home order. QSet would
+    // randomize it in Qt 6, so use an ordered list with membership checks.
+    QStringList locations;
     auto f = [&](QStandardPaths::StandardLocation l)
     {
         QString location = QStandardPaths::writableLocation(l);
@@ -133,14 +135,16 @@ static QStringList BrowseForFileInternal(QString context, QString caption, QStri
         if (!finfo.exists()) {
             return;
         }
-        locations.insert(location);
+        if (!locations.contains(location)) {
+            locations.append(location);
+        }
     };
     f(QStandardPaths::DesktopLocation);
     f(QStandardPaths::DocumentsLocation);
     f(QStandardPaths::DownloadLocation);
     f(QStandardPaths::HomeLocation);
     QList<QUrl> urls;
-    for (auto location : locations)
+    for (const auto &location : locations)
     {
         urls.append(QUrl::fromLocalFile(location));
     }

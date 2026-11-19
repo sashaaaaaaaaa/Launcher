@@ -30,6 +30,7 @@ void PrivatePackManager::save() const
     try
     {
         QStringList list(currentPacks.begin(), currentPacks.end());
+        list.sort(); // QSet iteration order is randomized in Qt 6
         FS::write(m_filename, list.join('\n').toUtf8());
         dirty = false;
     }

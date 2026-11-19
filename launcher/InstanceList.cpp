@@ -614,12 +614,15 @@ void InstanceList::saveGroupList()
     QJsonObject groupsArr;
     for (auto iter = reverseGroupMap.begin(); iter != reverseGroupMap.end(); iter++)
     {
-        auto list = iter.value();
+        // QSet iteration order is randomized in Qt 6; sort for reproducible output.
+        auto groupSet = iter.value();
+        QStringList list(groupSet.begin(), groupSet.end());
+        list.sort();
         auto name = iter.key();
         QJsonObject groupObj;
         QJsonArray instanceArr;
         groupObj.insert("hidden", QJsonValue(m_collapsedGroups.contains(name)));
-        for (auto item : list)
+        for (const auto &item : list)
         {
             instanceArr.append(QJsonValue(item));
         }

@@ -161,7 +161,9 @@ void ThemeList::processChanges()
     }
     const auto pending = m_reloadPending;
     m_reloadPending.clear();
-    for (auto &id : pending)
+    auto pendingList = QStringList(pending.begin(), pending.end());
+    pendingList.sort(); // QSet iteration order is randomized in Qt 6
+    for (const auto &id : pendingList)
     {
         CustomTheme *theme = userTheme(id);
         if (!theme)

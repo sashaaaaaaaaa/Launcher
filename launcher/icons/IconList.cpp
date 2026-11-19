@@ -119,7 +119,10 @@ void IconList::directoryChanged(const QString &path)
         emit iconUpdated(key);
     }
 
-    for (auto add : to_add)
+    // QSet iteration order is randomized in Qt 6; add new icons in a stable order.
+    QStringList addList(to_add.begin(), to_add.end());
+    addList.sort();
+    for (const auto &add : addList)
     {
         qDebug() << "Adding " << add;
         QFileInfo addfile(add);

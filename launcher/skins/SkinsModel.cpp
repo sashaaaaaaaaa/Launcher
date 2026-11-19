@@ -139,7 +139,10 @@ void SkinsModel::directoryChanged(const QString &path)
     }
 
     bool added = false;
-    for (auto add : to_add)
+    // QSet iteration order is randomized in Qt 6; insert new skins in a stable order.
+    QStringList addList(to_add.begin(), to_add.end());
+    addList.sort();
+    for (const auto &add : addList)
     {
         m_watcher->addPath(add);
         QByteArray data;
