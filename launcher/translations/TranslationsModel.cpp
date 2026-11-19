@@ -18,7 +18,7 @@
 
 #include "Application.h"
 
-const static QLatin1Literal defaultLangCode("en_US");
+const static QLatin1String defaultLangCode("en_US");
 
 enum class FileType
 {
@@ -325,7 +325,8 @@ void TranslationsModel::reloadLocalFiles()
     {
         return;
     }
-    beginInsertRows(QModelIndex(), 0, d->m_languages.size() + languages.size() - 1);
+    const int first = d->m_languages.size();
+    beginInsertRows(QModelIndex(), first, first + languages.size() - 1);
     for(auto & language: languages)
     {
         d->m_languages.append(language);
@@ -370,7 +371,7 @@ QVariant TranslationsModel::data(const QModelIndex& index, int role) const
             case Column::Completeness:
             {
                 QString text;
-                text.sprintf("%3.1f %%", lang.percentTranslated());
+                text = QString::asprintf("%3.1f %%", lang.percentTranslated());
                 return text;
             }
         }
@@ -442,7 +443,7 @@ Language * TranslationsModel::findLanguage(const QString& key)
     }
     else
     {
-        return found;
+        return &*found;
     }
 }
 
@@ -491,7 +492,7 @@ bool TranslationsModel::selectLanguage(QString key)
     bool successful = false;
     // FIXME: this is likely never present. FIX IT.
     d->m_qt_translator.reset(new QTranslator());
-    if (d->m_qt_translator->load("qt_" + langCode, QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
+    if (d->m_qt_translator->load("qt_" + langCode, QLibraryInfo::path(QLibraryInfo::TranslationsPath)))
     {
         qDebug() << "Loading Qt Language File for" << langCode.toLocal8Bit().constData() << "...";
         if (!QCoreApplication::installTranslator(d->m_qt_translator.get()))
@@ -566,8 +567,7 @@ QModelIndex TranslationsModel::selectedIndex()
     auto found = findLanguage(d->m_selectedLanguage);
     if(found)
     {
-        // QVector iterator freely converts to pointer to contained type
-        return index(found - d->m_languages.begin(), 0, QModelIndex());
+        return index(int(found - d->m_languages.data()), 0, QModelIndex());
     }
     return QModelIndex();
 }

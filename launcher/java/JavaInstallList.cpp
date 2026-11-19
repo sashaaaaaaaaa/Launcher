@@ -15,7 +15,6 @@
 
 #include <QtNetwork>
 #include <QtXml>
-#include <QRegExp>
 
 #include <QDebug>
 
@@ -81,7 +80,7 @@ QVariant JavaInstallList::data(const QModelIndex &index, int role) const
     switch (role)
     {
         case VersionPointerRole:
-            return qVariantFromValue(m_vlist[index.row()]);
+            return QVariant::fromValue(m_vlist[index.row()]);
         case VersionIdRole:
             return version->descriptor();
         case VersionRole:
@@ -127,9 +126,8 @@ bool sortJavas(BaseVersionPtr left, BaseVersionPtr right)
 
 void JavaInstallList::sortVersions()
 {
-    beginResetModel();
+    // Called from updateListData(), which already holds a model reset.
     std::sort(m_vlist.begin(), m_vlist.end(), sortJavas);
-    endResetModel();
 }
 
 JavaListLoadTask::JavaListLoadTask(JavaInstallList *vlist) : Task()
