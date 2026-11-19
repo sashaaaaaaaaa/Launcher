@@ -83,7 +83,7 @@ QSize CappedIconEngine::actualSize(const QSize &size, QIcon::Mode, QIcon::State)
     return m_size.scaled(size, Qt::KeepAspectRatio);
 }
 
-QList<QSize> CappedIconEngine::availableSizes(QIcon::Mode, QIcon::State) const
+QList<QSize> CappedIconEngine::availableSizes(QIcon::Mode, QIcon::State)
 {
     if (null())
         return {};

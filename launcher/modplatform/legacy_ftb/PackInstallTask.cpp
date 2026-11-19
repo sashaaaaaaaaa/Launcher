@@ -88,7 +88,11 @@ void PackInstallTask::unzip()
         return;
     }
 
-    m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), MMCZip::extractDir, archivePath, extractDir.absolutePath() + "/unzip");
+    const QString archivePathCopy = archivePath;
+    const QString unzipPath = extractDir.absolutePath() + "/unzip";
+    m_extractFuture = QtConcurrent::run(QThreadPool::globalInstance(), [archivePathCopy, unzipPath]() {
+        return MMCZip::extractDir(archivePathCopy, unzipPath);
+    });
     connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::finished, this, &PackInstallTask::onUnzipFinished);
     connect(&m_extractFutureWatcher, &QFutureWatcher<QStringList>::canceled, this, &PackInstallTask::onUnzipCanceled);
     m_extractFutureWatcher.setFuture(m_extractFuture);

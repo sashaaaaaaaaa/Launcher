@@ -29,7 +29,7 @@ ProxyPage::ProxyPage(QWidget *parent) : QWidget(parent), ui(new Ui::ProxyPage)
     loadSettings();
     updateCheckboxStuff();
 
-    connect(ui->proxyGroup, SIGNAL(buttonClicked(int)), SLOT(proxyChanged(int)));
+    connect(ui->proxyGroup, SIGNAL(idClicked(int)), SLOT(proxyChanged(int)));
 }
 
 ProxyPage::~ProxyPage()

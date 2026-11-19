@@ -137,13 +137,16 @@ void Download::startRequest()
     }
 
     request.setHeader(QNetworkRequest::UserAgentHeader, BuildConfig.USER_AGENT);
+    // Redirects are handled explicitly in handleRedirect() so cache validation,
+    // progress tracking and error reporting apply to every hop.
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::ManualRedirectPolicy);
 
     QNetworkReply *rep = m_network->get(request);
 
     m_reply.reset(rep);
     connect(rep, SIGNAL(downloadProgress(qint64, qint64)), SLOT(downloadProgress(qint64, qint64)));
     connect(rep, SIGNAL(finished()), SLOT(downloadFinished()));
-    connect(rep, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(downloadError(QNetworkReply::NetworkError)));
+    connect(rep, SIGNAL(errorOccurred(QNetworkReply::NetworkError)), SLOT(downloadError(QNetworkReply::NetworkError)));
     connect(rep, &QNetworkReply::sslErrors, this, &Download::sslErrors);
     connect(rep, &QNetworkReply::readyRead, this, &Download::downloadReadyRead);
     if(m_stall_timer.interval() > 0)

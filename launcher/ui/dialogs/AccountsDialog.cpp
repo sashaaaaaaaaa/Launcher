@@ -26,6 +26,8 @@
 #include <qrcode/QrCodeGenerator.h>
 #include <QMessageBox>
 #include <QClipboard>
+#include <QRegularExpression>
+#include <QRegularExpressionValidator>
 
 constexpr auto selectionFlags = QItemSelectionModel::Clear | QItemSelectionModel::Select | QItemSelectionModel::Rows | QItemSelectionModel::Current;
 
@@ -138,9 +140,9 @@ AccountsDialog::AccountsDialog(QWidget *parent, const QString& internalId) : QDi
     m_goodIcon = APPLICATION->getThemedIcon("status-good");
     m_yellowIcon = APPLICATION->getThemedIcon("status-yellow");
     m_badIcon = APPLICATION->getThemedIcon("status-bad");
-    QRegExp permittedNames("[a-zA-Z0-9_]{3,16}");
+    QRegularExpression permittedNames("^[a-zA-Z0-9_]{3,16}$");
     auto nameEdit = ui->createProfileNameEdit;
-    nameEdit->setValidator(new QRegExpValidator(permittedNames));
+    nameEdit->setValidator(new QRegularExpressionValidator(permittedNames));
     nameEdit->setClearButtonEnabled(true);
 
     m_validityAction = nameEdit->addAction(m_yellowIcon, QLineEdit::LeadingPosition);

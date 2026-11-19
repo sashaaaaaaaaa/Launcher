@@ -34,7 +34,8 @@ public:
         setForegroundRole(QPalette::ToolTipText);
         setBackgroundRole(QPalette::ToolTipBase);
         // as QToolTip lays out its label
-        setMargin(1 + style()->pixelMetric(QStyle::PM_ToolTipLabelFrameWidth, nullptr, this));
+        const int margin = 1 + style()->pixelMetric(QStyle::PM_ToolTipLabelFrameWidth, nullptr, this);
+        setContentsMargins(margin, margin, margin, margin);
         setFrameStyle(QFrame::NoFrame);
         setAlignment(Qt::AlignLeft);
         setIndent(1);

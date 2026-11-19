@@ -13,7 +13,7 @@ QSize ElidedLabel::minimumSizeHint() const
 {
     // room for the "…" alone; the height stays a label's
     const int margins = 2 * (frameWidth() + margin());
-    return QSize(fontMetrics().width(QStringLiteral("…")) + margins, QLabel::minimumSizeHint().height());
+    return QSize(fontMetrics().horizontalAdvance(QStringLiteral("…")) + margins, QLabel::minimumSizeHint().height());
 }
 
 void ElidedLabel::paintEvent(QPaintEvent *)

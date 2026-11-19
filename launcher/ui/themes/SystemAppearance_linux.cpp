@@ -128,12 +128,25 @@ QMap<QString, QMap<QString, QColor>> readKdeColors(const QString &path)
     return out;
 }
 
+static QPalette emptyPalette()
+{
+    QPalette none;
+    for (int group = 0; group < QPalette::NColorGroups; ++group)
+    {
+        for (int role = 0; role < QPalette::NColorRoles; ++role)
+        {
+            none.setColor(static_cast<QPalette::ColorGroup>(group),
+                          static_cast<QPalette::ColorRole>(role), QColor());
+        }
+    }
+    return none;
+}
+
 // The scheme as a palette, every role set: what it leaves out from our Bright or Dark,
 // whichever is closer to its window colour. None (no roles set) without a scheme.
 QPalette kdePalette(const QMap<QString, QMap<QString, QColor>> &scheme)
 {
-    QPalette none;
-    none.resolve(0);
+    QPalette none = emptyPalette();
     const QColor window = scheme.value("Window").value("BackgroundNormal");
     if (!window.isValid())
         return none;
@@ -166,9 +179,7 @@ QPalette readPalette()
 {
     if (!onKde())
     {
-        QPalette none;
-        none.resolve(0);
-        return none;
+        return emptyPalette();
     }
     return kdePalette(readKdeColors(kdeGlobalsPath()));
 }
@@ -187,7 +198,7 @@ public:
             watcher.addPath(kdeGlobalsPath());
             connect(&watcher, &QFileSystemWatcher::fileChanged, this, &Private::schemeMaybeChanged);
             connect(&watcher, &QFileSystemWatcher::directoryChanged, this, &Private::schemeMaybeChanged);
-            qDebug() << "KDE colour scheme:" << (palette.resolve() ? "read from" : "not in") << kdeGlobalsPath();
+            qDebug() << "KDE colour scheme:" << (palette.color(QPalette::Normal, QPalette::Window).isValid() ? "read from" : "not in") << kdeGlobalsPath();
         }
         qDebug().noquote() << "Portal: colour scheme"
                            << (mode == Mode::Unknown ? "unknown" : (mode == Mode::Dark ? "dark" : "bright"))
@@ -208,7 +219,7 @@ private slots:
         if (!watcher.files().contains(kdeGlobalsPath()) && QFileInfo::exists(kdeGlobalsPath()))
             watcher.addPath(kdeGlobalsPath());
         const QPalette now = readPalette();
-        if (now == palette && now.resolve() == palette.resolve())
+        if (now == palette)
             return;
         palette = now;
         emit q->changed();

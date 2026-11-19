@@ -10,7 +10,7 @@ LoggedProcess::LoggedProcess(QObject *parent) : QProcess(parent)
     connect(this, &QProcess::readyReadStandardOutput, this, &LoggedProcess::on_stdOut);
     connect(this, &QProcess::readyReadStandardError, this, &LoggedProcess::on_stdErr);
     connect(this, SIGNAL(finished(int,QProcess::ExitStatus)), SLOT(on_exit(int,QProcess::ExitStatus)));
-    connect(this, SIGNAL(error(QProcess::ProcessError)), this, SLOT(on_error(QProcess::ProcessError)));
+    connect(this, SIGNAL(errorOccurred(QProcess::ProcessError)), this, SLOT(on_error(QProcess::ProcessError)));
     connect(this, &QProcess::stateChanged, this, &LoggedProcess::on_stateChange);
 }
 
@@ -194,11 +194,7 @@ void LoggedProcess::on_stateChange(QProcess::ProcessState state)
 
 qint64 LoggedProcess::processId() const
 {
-#ifdef Q_OS_WIN
-    return pid() ? pid()->dwProcessId : 0;
-#else
-    return pid();
-#endif
+    return QProcess::processId();
 }
 
 void LoggedProcess::setDetachable(bool detachable)

@@ -67,7 +67,7 @@ bool GZip::zip(const QByteArray &uncompressedBytes, QByteArray &compressedBytes)
         return true;
     }
 
-    unsigned compLength = std::min(uncompressedBytes.size(), 16);
+    auto compLength = std::min<qsizetype>(uncompressedBytes.size(), 16);
     compressedBytes.clear();
     compressedBytes.resize(compLength);
 

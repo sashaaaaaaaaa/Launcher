@@ -197,7 +197,7 @@ QVariant WorldList::data(const QModelIndex &index, int role) const
     }
     case SeedRole:
     {
-        return qVariantFromValue<qlonglong>(world.seed());
+        return QVariant::fromValue<qlonglong>(world.seed());
     }
     case NameRole:
     {
@@ -274,7 +274,7 @@ public:
     }
 
 protected:
-    QVariant retrieveData(const QString &mimetype, QVariant::Type type) const
+    QVariant retrieveData(const QString &mimetype, QMetaType type) const
     {
         QList<QUrl> urls;
         for(auto &world: m_worlds)

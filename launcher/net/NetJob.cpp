@@ -182,10 +182,10 @@ bool NetJob::abort()
 {
     bool fullyAborted = true;
     // fail all waiting
-    m_failed.unite(m_todo.toSet());
+    m_failed.unite(QSet<int>(m_todo.begin(), m_todo.end()));
     m_todo.clear();
     // abort active
-    auto toKill = m_doing.toList();
+    QList<int> toKill(m_doing.begin(), m_doing.end());
     for(auto index: toKill)
     {
         auto part = downloads[index];

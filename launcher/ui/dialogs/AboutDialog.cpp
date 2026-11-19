@@ -30,7 +30,6 @@ QString getCreditsHtml(QStringList patrons)
 {
     QString output;
     QTextStream stream(&output);
-    stream.setCodec(QTextCodec::codecForName("UTF-8"));
     stream << "<center>\n";
 
     stream << "<h3>" << QObject::tr("Original Author", "About Credits") << "</h3>\n";
@@ -135,7 +134,7 @@ void AboutDialog::patronListLoaded()
 {
     QString patronListStr(dataSink);
     dataSink.clear();
-    QString html = getCreditsHtml(patronListStr.split("\n", QString::SkipEmptyParts));
+    QString html = getCreditsHtml(patronListStr.split("\n", Qt::SkipEmptyParts));
     ui->creditsText->setHtml(html);
 }
 

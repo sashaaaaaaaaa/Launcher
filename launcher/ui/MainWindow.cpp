@@ -30,7 +30,7 @@
 
 #include <QtGui/QKeyEvent>
 
-#include <QtWidgets/QAction>
+#include <QAction>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QHBoxLayout>
@@ -46,7 +46,7 @@
 #include <QtWidgets/QToolButton>
 #include <QtWidgets/QWidgetAction>
 #include <QtWidgets/QProgressDialog>
-#include <QtWidgets/QShortcut>
+#include <QShortcut>
 
 #include <BaseInstance.h>
 #include <InstanceList.h>
@@ -1252,7 +1252,7 @@ void MainWindow::changeActiveAccount()
     QAction *sAction = (QAction *)sender();
 
     // Profile's associated Mojang username
-    if (sAction->data().type() != QVariant::Type::Int)
+    if (sAction->data().typeId() != QMetaType::Int)
         return;
 
     QVariant data = sAction->data();
@@ -1362,7 +1362,7 @@ void MainWindow::updateNotAvailable()
 
 QList<int> stringToIntList(const QString &string)
 {
-    QStringList split = string.split(',', QString::SkipEmptyParts);
+    QStringList split = string.split(',', Qt::SkipEmptyParts);
     QList<int> out;
     for (int i = 0; i < split.size(); ++i)
     {

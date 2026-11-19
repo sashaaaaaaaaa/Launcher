@@ -158,6 +158,9 @@ private:
     int contentWidth() const;
 
 private: /* methods */
+    // Qt 6 removed QAbstractItemView::viewOptions(); recreate it from the protected
+    // initViewItemOption() so existing consumers (including friend VisualGroup) keep working.
+    QStyleOptionViewItem viewOptions() const;
     int itemWidth() const;
     void setHovered(const QModelIndex &index);
     int calculateItemsPerRow() const;

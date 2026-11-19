@@ -144,7 +144,14 @@ QPalette SystemAppearance::palette() const
     if (d->mode != Mode::Dark)
     {
         QPalette none;
-        none.resolve(0);
+        for (int group = 0; group < QPalette::NColorGroups; ++group)
+        {
+            for (int role = 0; role < QPalette::NColorRoles; ++role)
+            {
+                none.setColor(static_cast<QPalette::ColorGroup>(group),
+                              static_cast<QPalette::ColorRole>(role), QColor());
+            }
+        }
         return none;
     }
     const QColor window(0x20, 0x20, 0x20), button(0x2d, 0x2d, 0x2d), base(0x2b, 0x2b, 0x2b), text(Qt::white);

@@ -111,7 +111,7 @@ void SkinsModel::directoryChanged(const QString &path)
         }
         current_list.push_back(it.filename);
     }
-    QSet<QString> current_set = current_list.toSet();
+    QSet<QString> current_set(current_list.begin(), current_list.end());
 
     QSet<QString> to_remove = current_set;
     to_remove -= new_set;

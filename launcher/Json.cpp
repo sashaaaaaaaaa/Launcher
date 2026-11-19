@@ -2,8 +2,10 @@
 
 #include "Json.h"
 
+#include <QBinaryJson>
 #include <QFile>
 #include <QRegularExpression>
+#include <QtEndian>
 
 #include "FileSystem.h"
 #include <math.h>
@@ -26,11 +28,11 @@ void write(const QJsonArray &array, const QString &filename)
 
 QByteArray toBinary(const QJsonObject &obj)
 {
-    return QJsonDocument(obj).toBinaryData();
+    return QBinaryJson::toBinaryData(QJsonDocument(obj));
 }
 QByteArray toBinary(const QJsonArray &array)
 {
-    return QJsonDocument(array).toBinaryData();
+    return QBinaryJson::toBinaryData(QJsonDocument(array));
 }
 QByteArray toText(const QJsonObject &obj)
 {
@@ -43,18 +45,19 @@ QByteArray toText(const QJsonArray &array)
 
 static bool isBinaryJson(const QByteArray &data)
 {
-    decltype(QJsonDocument::BinaryFormatTag) tag = QJsonDocument::BinaryFormatTag;
-    if (size_t(data.size()) < sizeof(tag))
+    // Qt 5 binary JSON starts with the little-endian 'qbjs' tag.
+    constexpr quint32 binaryFormatTag = 0x71626a73u;
+    if (size_t(data.size()) < sizeof(binaryFormatTag))
     {
         return false;
     }
-    return memcmp(data.constData(), &tag, sizeof(QJsonDocument::BinaryFormatTag)) == 0;
+    return qFromLittleEndian<quint32>(data.constData()) == binaryFormatTag;
 }
 QJsonDocument requireDocument(const QByteArray &data, const QString &what)
 {
     if (isBinaryJson(data))
     {
-        QJsonDocument doc = QJsonDocument::fromBinaryData(data);
+        QJsonDocument doc = QBinaryJson::fromBinaryData(data, QBinaryJson::Validate);
         if (doc.isNull())
         {
             throw JsonException(what + ": Invalid JSON (binary JSON detected)");

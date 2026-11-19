@@ -339,7 +339,7 @@ slots:
      */
     void test_liveTree()
     {
-        auto sites = QString::fromLocal8Bit(qgetenv("TREE_UPDATER_LIVE_SITES")).split(';', QString::SkipEmptyParts);
+        auto sites = QString::fromLocal8Bit(qgetenv("TREE_UPDATER_LIVE_SITES")).split(';', Qt::SkipEmptyParts);
         if(sites.isEmpty())
         {
             QSKIP("TREE_UPDATER_LIVE_SITES isn't set");

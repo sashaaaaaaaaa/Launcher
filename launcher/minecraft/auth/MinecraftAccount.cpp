@@ -20,7 +20,7 @@
 #include <QUuid>
 #include <QJsonObject>
 #include <QJsonArray>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QStringList>
 #include <QJsonDocument>
 
@@ -37,7 +37,7 @@
 #include <Application.h>
 
 MinecraftAccount::MinecraftAccount(QObject* parent) : QObject(parent) {
-    data.internalId = QUuid::createUuid().toString().remove(QRegExp("[{}-]"));
+    data.internalId = QUuid::createUuid().toString().remove(QRegularExpression("[{}-]"));
 }
 
 MinecraftAccountPtr MinecraftAccount::loadFromJsonV3(const QJsonObject& json) {

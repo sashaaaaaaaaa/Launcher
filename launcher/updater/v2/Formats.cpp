@@ -322,17 +322,18 @@ Variant variant(const QString &id, const QJsonValue &value, const QString &where
             }
         }
     }
-    auto entrySet = QSet<QString>::fromList(entries);
+    QSet<QString> entrySet(entries.begin(), entries.end());
     if(entrySet.size() != entries.size())
     {
         fail(QString("%1: a path is listed twice").arg(where));
     }
-    if(!QSet<QString>(directories).intersect(entrySet).isEmpty())
+    QSet<QString> directorySet(directories.begin(), directories.end());
+    if(!directorySet.intersect(entrySet).isEmpty())
     {
         fail(QString("%1: a listed path is also a directory of other paths").arg(where));
     }
 
-    auto fileSet = QSet<QString>::fromList(paths);
+    QSet<QString> fileSet(paths.begin(), paths.end());
     for(auto &linkPath: linkPaths)
     {
         auto target = resolveLink(linkPath, links, QString("%1: link '%2'").arg(where, linkPath));

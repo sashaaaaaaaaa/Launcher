@@ -37,7 +37,9 @@ State::State(const QByteArray &floorKeys, const QStringList &pinnedRootKeys, qin
         m_error = QString("the compiled-in keys document isn't valid: %1").arg(error);
         return;
     }
-    if(QSet<QString>::fromList(m_floorKeys.rootKeys) != QSet<QString>::fromList(pinnedRootKeys) || m_floorKeys.rootKeys.size() != pinnedRootKeys.size())
+    const QSet<QString> floorKeySet(m_floorKeys.rootKeys.begin(), m_floorKeys.rootKeys.end());
+    const QSet<QString> pinnedKeys(pinnedRootKeys.begin(), pinnedRootKeys.end());
+    if(floorKeySet != pinnedKeys || m_floorKeys.rootKeys.size() != pinnedRootKeys.size())
     {
         m_error = "the compiled-in keys document doesn't list exactly the pinned root keys";
         return;

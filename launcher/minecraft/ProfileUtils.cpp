@@ -4,6 +4,7 @@
 #include "Json.h"
 #include <QDebug>
 
+#include <QBinaryJson>
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QRegularExpression>
@@ -149,7 +150,7 @@ VersionFilePtr parseBinaryJsonFile(const QFileInfo &fileInfo)
         auto errorStr = QObject::tr("Unable to open the version file %1: %2.").arg(fileInfo.fileName(), file.errorString());
         return createErrorVersionFile(fileInfo.completeBaseName(), fileInfo.absoluteFilePath(), errorStr);
     }
-    QJsonDocument doc = QJsonDocument::fromBinaryData(file.readAll());
+    QJsonDocument doc = QBinaryJson::fromBinaryData(file.readAll(), QBinaryJson::Validate);
     file.close();
     if (doc.isNull())
     {
