@@ -36,7 +36,7 @@ QSize FittedIconEngine::actualSize(const QSize &size, QIcon::Mode mode, QIcon::S
     return IconUtils::fitted(m_icon, size, 1.0, mode, state).size();
 }
 
-QList<QSize> FittedIconEngine::availableSizes(QIcon::Mode, QIcon::State) const
+QList<QSize> FittedIconEngine::availableSizes(QIcon::Mode, QIcon::State)
 {
     // any size: window systems then ask for the ones they use
     return {};

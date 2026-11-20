@@ -23,7 +23,7 @@ public:
     void paint(QPainter *painter, const QRect &rect, QIcon::Mode mode, QIcon::State state) override;
     QPixmap pixmap(const QSize &size, QIcon::Mode mode, QIcon::State state) override;
     QSize actualSize(const QSize &size, QIcon::Mode mode, QIcon::State state) override;
-    QList<QSize> availableSizes(QIcon::Mode mode, QIcon::State state) const override;
+    QList<QSize> availableSizes(QIcon::Mode mode, QIcon::State state) override;
     QString key() const override;
     QIconEngine *clone() const override;
 
