@@ -20,6 +20,7 @@
 
 #include <BaseVersion.h>
 #include <icons/IconList.h>
+#include <icons/IconUtils.h>
 #include <tasks/Task.h>
 #include <InstanceList.h>
 
@@ -52,7 +53,7 @@ NewInstanceDialog::NewInstanceDialog(const QString & initialGroup, const QString
     setWindowIcon(APPLICATION->getThemedIcon("new"));
 
     InstIconKey = "default";
-    ui->iconButton->setIcon(APPLICATION->icons()->getIcon(InstIconKey));
+    ui->iconButton->setIcon(IconUtils::fittedIcon(APPLICATION->icons()->getIcon(InstIconKey)));
 
     const auto groupSourceList = APPLICATION->instances()->getGroups();
     const QSet<QString> groups(groupSourceList.begin(), groupSourceList.end());
@@ -165,7 +166,7 @@ void NewInstanceDialog::setSuggestedPack(const QString& name, InstanceTask* task
 
     if(!task)
     {
-        ui->iconButton->setIcon(APPLICATION->icons()->getIcon("default"));
+        ui->iconButton->setIcon(IconUtils::fittedIcon(APPLICATION->icons()->getIcon("default")));
         importIcon = false;
     }
 
@@ -179,13 +180,13 @@ void NewInstanceDialog::setSuggestedIconFromFile(const QString &path, const QStr
     importIconPath = path;
     importIconName = name;
 
-    //Hmm, for some reason they can be to small
-    ui->iconButton->setIcon(QIcon(path));
+    // read capped, and fit as everywhere: platforms' logos come in any size and shape
+    ui->iconButton->setIcon(IconUtils::fittedIcon(IconUtils::fromFile(path)));
 }
 
 void NewInstanceDialog::setSuggestedIcon(const QString &key)
 {
-    auto icon = APPLICATION->icons()->getIcon(key);
+    auto icon = IconUtils::fittedIcon(APPLICATION->icons()->getIcon(key));
     importIcon = false;
 
     ui->iconButton->setIcon(icon);
@@ -244,7 +245,7 @@ void NewInstanceDialog::on_iconButton_clicked()
     if (dlg.result() == QDialog::Accepted)
     {
         InstIconKey = dlg.selectedIconKey;
-        ui->iconButton->setIcon(APPLICATION->icons()->getIcon(InstIconKey));
+        ui->iconButton->setIcon(IconUtils::fittedIcon(APPLICATION->icons()->getIcon(InstIconKey)));
         importIcon = false;
     }
 }
